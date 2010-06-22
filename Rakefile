@@ -11,7 +11,7 @@ begin
     gem.email = "peter@flippyhead.com"
     gem.homepage = "http://github.com/flippyhead/sir_tracks_alot"
     gem.authors = ["Peter T. Brown"]
-    gemspec.add_bundler_dependencies
+    gem.add_bundler_dependencies
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
