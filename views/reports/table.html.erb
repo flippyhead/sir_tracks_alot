@@ -1,0 +1,24 @@
+<div class="report <%=options.report_class%>">
+	<h2><%=options.report_title%></h2>
+      
+	<table>
+	  <tr>		
+			<% data.column_names.each do |column| %>
+				<th class="<%=to_dom_class(column)%>"><%= column %></th>
+			<% end %>
+	  </tr>
+
+		<% data.each do |row| %>
+			<% title = row[0]; action = row[1]; views = row[2]; visits = row[3] %>
+			
+			<tr>
+				<% row.each_with_index do |item, index| %>
+					<% name = data.column_names[index] %>
+					<td class="<%=to_dom_class(name)%> <%=item.instance_of?(Fixnum) ? 'count' : ''%>">
+						<%= render_data(name, item) %>
+					</td>
+				<% end %>
+			</tr>			
+		<% end %>
+	</table>
+</div>

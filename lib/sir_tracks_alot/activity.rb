@@ -1,0 +1,139 @@
+module SirTracksAlot
+  class Activity < Persistable
+    ACTIONS = [:create, :view, :login, :search, :update, :destroy]
+    DATE_FORMATS = {:hourly => '%Y/%m/%d %H', :daily => '%Y/%m/%d'}
+    LIMIT = 1000
+    
+    attribute :created_at
+    attribute :last_event # Clock.now
+    attribute :owner      # 123123
+    attribute :actor      # /users/peter-brown   
+    attribute :target     # /discussions/23423
+    attribute :category   # **automatically set**
+    attribute :action     # create, view, login, etc.
+    attribute :user_agent # IE/Safari Windows/Mac etc.
+    
+    index :last_event
+    index :owner
+    index :actor
+    index :target
+    index :category
+    index :action
+    index :user_agent
+    
+    list :events          # Clock.now's
+        
+    # Find activities that match attributes 
+    # Strings are passed to Ohm
+    # Regular Expression filters match against retrieved attribute values
+    # 
+    # filter(:category => 'category', :target => /\/targets\/\d+/)
+    def self.filter(options_for_find, &block)      
+      activities = []
+      sort = options_for_find.delete(:sort) || {}
+      
+      strings = {}
+      matchers = {}
+      
+      options_for_find.each do |key, candidate|
+        matchers[key] = candidate if candidate.kind_of?(Regexp)
+        strings[key]  = candidate if candidate.kind_of?(String)
+      end      
+      
+      all = SirTracksAlot::Activity.find(strings).sort(sort)
+      
+      all.each do |activity|
+        pass = true
+        
+        matchers.each do |key, matcher|
+          pass = false if !matcher.match(activity.send(key))
+        end
+
+        next unless pass
+        
+        yield activity if block_given?
+        
+        activities << activity
+      end
+      
+      activities      
+    end
+      
+    # resolution can be: hourly = %Y/%m/%d %H, daily = %Y/%m/%d or any valid strftime string
+    def self.count_by(resolution, options_for_find = {})      
+      groups = {}
+      
+      filter(options_for_find) do |activity|
+        activity.views(resolution).each do |time, count| 
+          groups[time] ||= 0
+          groups[time] += count
+        end
+      end
+      
+      groups
+    end
+    
+    def self.recent(options_for_find, options_for_sort = {:order => 'DESC', :limit => LIMIT})
+      SirTracksAlot::Activity.find(options_for_find).sort_by(:last_event, options_for_sort)
+    end      
+        
+    def self.count(what, options_for_find)      
+      what = [what] unless what.kind_of?(Array)      
+      views, visits = 0, 0      
+      session_duration = options_for_find.delete(:session_duration)
+      resolution = options_for_find.delete(:resolution)
+      
+      filter(options_for_find) do |activity|
+        views += activity.views(resolution) if what.include?(:views)
+        visits += activity.visits(session_duration) if what.include?(:visits)
+      end      
+            
+      return [views, visits] if what == [:views, :visits]
+      return [visits, views] if what == [:visits, :views]
+      return views if what == [:views]
+      return visits if what == [:visits]
+      raise ArgumentError("what must be one or more of :views, :visits")
+    end        
+        
+    def views(resolution = nil)
+      return events.size if resolution.nil?
+            
+      groups = {}
+      
+      date_format = resolution.kind_of?(String) ? resolution : DATE_FORMATS[resolution]
+
+      events.each do |event|      
+        time = Time.at(event.to_i).utc.strftime(date_format) # lop of some detail
+        groups[time.to_s] ||= 0
+        groups[time.to_s] += 1 
+      end
+      
+      return groups
+    end
+    
+    # Count one visit for all events every session_duration (in seconds)
+    # e.g. 3 visits within 15 minutes counts as one, 1 visit 2 days later counts as another
+    def visits(sd = 1800)
+      session_duration = sd || 1800
+      count = events.size > 0 ? 1 : 0
+      last_event = events.first
+      
+      events.each do |event|
+        count += 1 if (event.to_i - last_event.to_i > session_duration)
+        last_event = event
+      end
+      
+      count
+    end
+        
+    private
+    
+    def validate
+      assert_present :owner
+      assert_present :target
+      assert_present :action
+      assert_unique([:owner, :target, :action, :category, :user_agent, :actor])
+    end
+    
+  end
+end
