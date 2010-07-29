@@ -12,36 +12,45 @@ module SirTracksAlot
     attribute :category   # **automatically set**
     attribute :action     # create, view, login, etc.
     attribute :user_agent # IE/Safari Windows/Mac etc.
+    list      :events     # Clock.now's
     
-    index :last_event
     index :owner
     index :actor
     index :target
     index :category
+    index :last_event
     index :action
-    index :user_agent
-    
-    list :events          # Clock.now's
+    index :user_agent    
         
     # Find activities that match attributes 
     # Strings are passed to Ohm
     # Regular Expression filters match against retrieved attribute values
     # 
-    # filter(:category => 'category', :target => /\/targets\/\d+/)
+    # filter(:actor => 'user1', :target => /\/targets\/\d+/, :action => ['view', 'create'], :category => ['/root', '/other_root'])
     def self.filter(options_for_find, &block)      
       activities = []
-      sort = options_for_find.delete(:sort) || {}
+      # sort = options_for_find.delete(:sort) || {}
+      all = []
       
       strings = {}
       matchers = {}
+      arrays = {}
       
       options_for_find.each do |key, candidate|
-        matchers[key] = candidate if candidate.kind_of?(Regexp)
-        strings[key]  = candidate if candidate.kind_of?(String)
-      end      
+        matchers[key] = candidate if candidate.kind_of?(Regexp) && !candidate.blank?
+        strings[key]  = candidate if candidate.kind_of?(String) && !candidate.blank?
+        arrays[key]   = candidate if candidate.kind_of?(Array)  && !candidate.blank?
+      end
       
-      all = SirTracksAlot::Activity.find(strings).sort(sort)
-      
+      unless arrays.empty?
+        (arrays.values.inject{|a, b| a.product b}).each do |combo|
+          terms = {}; combo.each{|c| terms[find_key_from_value(arrays, c)] = c}
+          all += SirTracksAlot::Activity.find(terms.merge(strings)).to_a
+        end
+      else
+        all = SirTracksAlot::Activity.find(strings).to_a
+      end
+
       all.each do |activity|
         pass = true
         
@@ -113,20 +122,40 @@ module SirTracksAlot
     
     # Count one visit for all events every session_duration (in seconds)
     # e.g. 3 visits within 15 minutes counts as one, 1 visit 2 days later counts as another
-    def visits(sd = 1800)
-      session_duration = sd || 1800
-      count = events.size > 0 ? 1 : 0
+    def visits(sd = 1800, resolution = nil)
+      session_duration = sd || 1800      
       last_event = events.first
       
-      events.each do |event|
-        count += 1 if (event.to_i - last_event.to_i > session_duration)
-        last_event = event
-      end
+      count = events.size > 0 ? 1 : 0 # in case last_event == event (below)
+      groups = {}
       
-      count
-    end
+      events.each do |event|
+        boundary = (event.to_i - last_event.to_i > session_duration) # have we crossed a session boundary?
         
+        if resolution.nil? # i.e. don't group
+          count += 1 if boundary
+        else
+          date_format = resolution.kind_of?(String) ? resolution : DATE_FORMATS[resolution]
+          time = Time.at(event.to_i).utc.strftime(date_format) # lop of some detail
+          
+          groups[time.to_s] ||= count
+          groups[time.to_s] += 1 if boundary
+        end
+        
+        last_event = event # try the next bounary
+      end
+
+      resolution.nil? ? count : groups
+    end
+
+
     private
+    
+    def self.find_key_from_value(hash, value)
+      hash.each do |k, v|
+        return k if v.include?(value)
+      end
+    end
     
     def validate
       assert_present :owner

@@ -40,8 +40,10 @@ module DataHelper
       {:owner => 'owner', :target => '/other_categories', :actor => '/users/user1', :action => 'view', :user_agent => 'agent1'},
       {:owner => 'owner', :target => '/other_categories', :actor => '/users/user2', :action => 'view', :user_agent => 'agent2'}
     ]
-
-    @report_attributes = {:owner => 'owner', :roots => ['categories'], :actions => ['view']}    
+    
+    @counts = {"/categories" => [1, 1], "/categories/item1" => [1, 1], "/categories/item2" => [1, 1]}
+    
+    @report_attributes = {:owner => 'owner', :roots => ['categories'], :actions => ['view'], :counts => @counts}
   end
 end
 

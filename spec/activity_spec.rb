@@ -5,8 +5,7 @@ describe SirTracksAlot::Activity do
   
   before do 
     RedisSpecHelper.reset
-    @now = SirTracksAlot::Clock.now
-    
+    @now = SirTracksAlot::Clock.now    
     @activity = SirTracksAlot::Activity.create(@activities[0])
     @activity.events << @now    
   end  
@@ -33,8 +32,7 @@ describe SirTracksAlot::Activity do
   context 'when filtering' do
     before do 
       @mock_activity = mock(SirTracksAlot::Activity, @activities[0])
-      @mock_activityz = mock('SortedActivity', :sort => [@mock_activity])
-      SirTracksAlot::Activity.stub!(:find => @mock_activityz)
+      SirTracksAlot::Activity.stub!(:find => [@mock_activity])
     end
     
     it "should find activities matching attribute regex" do
@@ -55,6 +53,20 @@ describe SirTracksAlot::Activity do
     
     it "should not match with negative regex" do
       SirTracksAlot::Activity.filter(:owner => /^(?!(.*owner.*))/).size.should == 0
+    end        
+  end
+  
+  context 'asdf' do
+    before do 
+      @activities.each{|a| SirTracksAlot.record(a)}          
+    end
+    
+    it "should filter by members of one array" do
+      SirTracksAlot::Activity.filter(:owner => 'owner', :target => ['/categories/item1', '/categories/item2']).size.should == 3
+    end    
+    
+    it "should filter by combinations of arrays" do
+      SirTracksAlot::Activity.filter(:owner => 'owner', :action => ['view', 'create'], :target => ['/categories/item1', '/categories/item2']).size.should == 3
     end    
   end
   
@@ -67,12 +79,11 @@ describe SirTracksAlot::Activity do
   context 'when counting' do
     before do 
       @mock_activity = mock(SirTracksAlot::Activity, :visits => 1, :views => 2)
-      @mock_activityz = mock('SortedActivity', :sort => [@mock_activity])            
-      SirTracksAlot::Activity.stub!(:find => @mock_activityz)
+      SirTracksAlot::Activity.stub!(:find => [@mock_activity])
     end
     
     it "should look for activities using find options" do
-      SirTracksAlot::Activity.should_receive(:find).with(:owner => 'owner').and_return(@mock_activityz)
+      SirTracksAlot::Activity.should_receive(:find).with(:owner => 'owner').and_return([@mock_activity])
       SirTracksAlot::Activity.count(:views, :owner => 'owner')
     end
     
@@ -109,7 +120,7 @@ describe SirTracksAlot::Activity do
     end
   end
   
-  context 'when counting groups' do
+  context 'when counting views' do
     before do
       # nothing
     end
@@ -136,12 +147,7 @@ describe SirTracksAlot::Activity do
     it "should return count multiple for single group" do
       SirTracksAlot::Activity.all.first.events << @now
       @activity.views(:daily).values.should == [2]
-    end
-    
-    it "should return count multiple for single group" do
-      # SirTracksAlot::Activity.count_by(:daily).should == ''
-    end
-    
+    end    
   end
   
   context 'when calculating visits' do
@@ -161,13 +167,19 @@ describe SirTracksAlot::Activity do
       @activity.visits.should == 2
     end
 
-    it "should count 2 visits separated by greater than default session duration as 2 visits but not by not" do
+    it "should count 2 visits separated by greater than default session duration as 2, and a 3rd" do
       5.times{@activity.events << SirTracksAlot::Clock.now}
       @activity.events << SirTracksAlot::Clock.now + 2000
       @activity.events << SirTracksAlot::Clock.now + 4000
       @activity.visits.should == 3
     end
     
+    it "should group separated visits hourly" do
+      5.times{@activity.events << 1279735846}
+      @activity.events         << 1279709941      
+      # @activity.visits(1800, :hourly).should == {"2010/07/27 20"=>1, "2010/07/27 21"=>2}
+    end
+        
   end
   
 end

@@ -33,19 +33,21 @@ module SirTracksAlot
     
       def self.process(config)
         return false if config.nil?
-        
+
         SirTracksAlot.log.info("building report: #{config.inspect}")
-        
+
         begin
-          report = QueueHelper.constantize(QueueHelper.camelize("SirTracksAlot::Reports::#{config.report.capitalize}"))                
-          html = report.render_html(config.options)
-      
+          report = QueueHelper.constantize(QueueHelper.camelize("SirTracksAlot::Reports::#{config.report.capitalize}"))
+          counts = Count.find(:owner => config.owner)
+
+          html = report.render_html(config.options.merge(:counts => counts))
+
           cache = ReportCache.find_or_create(:owner => config.owner, :report => config.report)
           cache.update(:html => html)
         rescue Exception => e
           SirTracksAlot.log.fatal("Error building report #{config.report} for #{config.owner}: #{e}")
         end
-                
+
         true
       end      
     end

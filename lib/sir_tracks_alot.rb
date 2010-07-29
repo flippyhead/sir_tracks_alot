@@ -6,12 +6,18 @@ require "bundler"
 Bundler.setup
 Bundler.require 
 
+# require 'logging'
+# require 'twitter'
+# require 'ruport'
+# require 'ohm'
+# require 'redis'
+
 module SirTracksAlot
   TRACKABLE_ROOT = "#{File.dirname(__FILE__)}/.."
   
   autoload :Persistable, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot persistable.rb])
-  autoload :Rollup, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot rollup.rb])
   autoload :Activity, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot activity.rb])
+  autoload :Count, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot count.rb])
   autoload :Clock, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot clock.rb])  
   
   class SirTracksAlotError < StandardError    
@@ -107,6 +113,10 @@ module SirTracksAlot
     autoload :ReportCache, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot queue report_cache.rb])
     autoload :ReportConfig, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot queue report_config.rb])
     autoload :QueueHelper, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot queue queue_helper.rb])
+  end
+  
+  module Counters
+    autoload :TargetCounter, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot counters target_counter.rb])
   end
   
   module Reports
