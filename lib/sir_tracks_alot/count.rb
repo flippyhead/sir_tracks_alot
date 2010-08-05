@@ -21,6 +21,40 @@ module SirTracksAlot
     index :target
     index :category
 
+    # def self.count(what, options_for_find)      
+    #   what = [what] unless what.kind_of?(Array)      
+    #   views, visits = 0, 0      
+    #   session_duration = options_for_find.delete(:session_duration)
+    #   resolution = options_for_find.delete(:resolution)
+    #   
+    #   filter(options_for_find) do |activity|
+    #     views += activity.views(resolution) if what.include?(:views)
+    #     visits += activity.visits(session_duration) if what.include?(:visits)
+    #   en+d      
+    #         
+    #   return [views, visits] if what == [:views, :visits]
+    #   return [visits, views] if what == [:visits, :views]
+    #   return views if what == [:views]
+    #   return visits if what == [:visits]
+    #   raise ArgumentError("what must be one or more of :views, :visits")
+    # end        
+
+    def self.total(what, options_for_find)
+      what = [what] unless what.kind_of?(Array)      
+      views, visits = 0, 0      
+
+      filter(options_for_find) do |count|
+        views +=  count.views.to_i if what.include?(:views)
+        visits += count.visits.to_i if what.include?(:visits)
+      end      
+
+      return [views, visits] if what == [:views, :visits]
+      return [visits, views] if what == [:visits, :views]
+      return views if what == [:views]
+      return visits if what == [:visits]
+      raise ArgumentError("what must be one or more of :views, :visits")      
+    end
+
     def self.count(options)
       options = OpenStruct.new(options) if options.kind_of?(Hash)
       

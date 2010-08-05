@@ -4,8 +4,7 @@ describe SirTracksAlot::Count do
   include DataHelper
   
   before do 
-    RedisSpecHelper.reset
-    
+    RedisSpecHelper.reset    
     @set_activities.each{|a| SirTracksAlot.record(a)}
   end  
   
@@ -46,6 +45,50 @@ describe SirTracksAlot::Count do
       SirTracksAlot::Count.filter(:owner => 'owner', :target => ["/categories", "/categories/item1"]).collect{|c| c.target}.should_not
         include("/categories/item2")
     end    
+  end
+  
+  context 'when totally' do
+    before do 
+      @mock_activity = mock(SirTracksAlot::Activity, :visits => 1, :views => 2)
+      SirTracksAlot::Count.stub!(:filter => [@mock_activity])
+    end
+    
+    it "should look for activities using find options" do
+      SirTracksAlot::Count.should_receive(:filter).with(:owner => 'owner').and_return([@mock_activity])
+      SirTracksAlot::Count.total(:views, :owner => 'owner')
+    end
+    
+    # it "should look for views when counting views" do
+    #   @mock_activity.should_receive(:views).once.and_return(1)
+    #   SirTracksAlot::Count.total(:views, :owner => 'owner')
+    # end    
+    # 
+    # it "should not look for views when counting visits" do
+    #   @mock_activity.should_receive(:views).never
+    #   SirTracksAlot::Activity.count(:visits, :owner => 'owner')
+    # end
+    # 
+    # it "should return views and visits" do            
+    #   SirTracksAlot::Activity.count([:visits, :views], :owner => 'owner').should == [1,2]
+    # end
+    # 
+    # it "should return visits" do    
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner').should == 1
+    # end
+    # 
+    # it "should ignore empty only" do
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :only => {}).should == 1      
+    # end
+    # 
+    # it "should filter by category" do
+    #   @mock_activity.should_receive(:category).once.and_return('category')
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/)
+    # end
+    # 
+    # it "should filter by category and match returning correct count" do
+    #   @mock_activity.stub!(:category => 'category')
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/).should == 1      
+    # end
   end
   
   context 'when counting' do
