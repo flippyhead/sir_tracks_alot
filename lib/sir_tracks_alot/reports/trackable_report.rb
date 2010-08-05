@@ -4,9 +4,7 @@ module SirTracksAlot
       attr_accessor :all
       
       def setup
-        super        
-        options.categories = options.categories  #|| all.collect{|a| a.category}.uniq
-        options.actions = options.actions #|| all.collect{|a| a.action}.uniq
+        super
       end      
     end
   end

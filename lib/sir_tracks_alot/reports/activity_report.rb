@@ -1,6 +1,6 @@
 module SirTracksAlot
   module Reports
-    class ActivityReport < SirTracksAlotReport            
+    class ActivityReport < SirTracksAlotReport
       COLUMN_NAMES = ['actor', 'action', 'target', 'event']
       LIMIT = 10000
       
@@ -11,7 +11,7 @@ module SirTracksAlot
         super    
         options.column_names ||= COLUMN_NAMES
         
-        activities = Activity.recent({:owner => options.owner}, :order => 'DESC', :limit => (options.limit || LIMIT))        
+        activities = Activity.recent({:owner => options.owner}, :order => 'DESC', :limit => (options.limit || LIMIT))
         events = activities.collect{|a| [a.actor, a.action, a.target, a.last_event]}.reject{|a| a[2].nil?}
         
         table = Table(options.column_names, :data => events)

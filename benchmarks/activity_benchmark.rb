@@ -30,6 +30,6 @@ Benchmark.bmbm do |b|
   end
 
   b.report('count_by daily') do 
-    counts = Trackable::Activity.count_by(:daily, :owner => @owner)    
+    # counts = Trackable::Activity.count_by(:daily, :owner => @owner)    
   end  
 end

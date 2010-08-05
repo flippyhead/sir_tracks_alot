@@ -6,6 +6,7 @@ describe SirTracksAlot, 'when recording' do
   before do 
     RedisSpecHelper.reset
     @record_attributes = @activities[0]
+    @now = SirTracksAlot::Clock.now    
   end  
   
   it "should record activity" do
@@ -54,7 +55,7 @@ describe SirTracksAlot, 'when recording' do
   end
   
   it "should add date for now" do
-    SirTracksAlot::Clock.should_receive(:now).twice # once for activity create, once for events date
+    SirTracksAlot::Clock.should_receive(:now).twice.and_return(@now) # once for activity create, once for events date
     SirTracksAlot.record(@record_attributes)
   end
 

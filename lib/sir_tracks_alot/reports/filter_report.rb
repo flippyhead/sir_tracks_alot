@@ -22,18 +22,25 @@ module SirTracksAlot
       def setup
         super
         
-        counts = []
+        counts = {}
         options.filters ||= {}
         options.column_names ||= COLUMN_NAMES
-                
-        options.filters.each do |title, options_for_find|          
-          views, visits = Activity.count([:views, :visits], options_for_find.merge(:owner => options.owner))          
-          counts << [title, views, visits] if views > 0
+        
+        
+        options.filters.each do |title, options_for_find|
+          Count.filter(options_for_find.merge(:owner => options.owner)).each do |count|
+            counts[title] ||= [0,0]
+            counts[title][0] += count.visits.to_i
+            counts[title][1] += count.views.to_i
+          end
+        end
+      
+        table = Table(options.column_names) do |t|
+          counts.each do |title, n|
+            t << [title, n[0], n[1]]
+          end
         end
         
-        
-        table = Table(options.column_names, :data => counts)
-
         table.sort_rows_by!('page views', :order => :descending)
         
         self.data = table

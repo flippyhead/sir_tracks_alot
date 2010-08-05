@@ -5,15 +5,13 @@ describe SirTracksAlot::Activity do
   
   before do 
     RedisSpecHelper.reset
-    @now = SirTracksAlot::Clock.now    
+    @now = SirTracksAlot::Clock.now
     @activity = SirTracksAlot::Activity.create(@activities[0])
-    @activity.events << @now    
+    @activity.events << @now
+    @activity.update(:last_event => @now)
   end  
   
   context 'when creating' do
-    before do 
-    end
-    
     it "should store valid activities" do
       @activity.should be_valid
     end
@@ -27,9 +25,41 @@ describe SirTracksAlot::Activity do
       activity = SirTracksAlot::Activity.create(@activities[0]) # already created in before
       activity.should_not be_valid
     end
+    
+    it "should set counted" do
+      @activity.counted!
+      @activity.should be_counted
+    end
+    
+    it "should default to uncounted" do
+      @activity.counted.should == '0'
+    end
   end
   
-  context 'when filtering' do
+  context 'when purging' do
+    before do
+      @activities.each{|a| SirTracksAlot.record(a)}
+    end
+    
+    it "should not purge uncounted" do
+      SirTracksAlot::Activity.purge!
+      SirTracksAlot::Activity.all.size.should == 8
+    end        
+    
+    it "should purge counted" do
+      SirTracksAlot::Activity.all.each{|a| a.counted!}
+      SirTracksAlot::Activity.purge!
+      SirTracksAlot::Activity.all.size.should == 0
+    end
+    
+    it "should purge counted by range" do
+      SirTracksAlot::Activity.all.each{|a| a.counted!}
+      SirTracksAlot::Activity.purge!({}, :start => 5, :limit => 10)
+      SirTracksAlot::Activity.all.size.should == 5
+    end
+  end
+  
+  context 'when filtering (simple)' do
     before do 
       @mock_activity = mock(SirTracksAlot::Activity, @activities[0])
       SirTracksAlot::Activity.stub!(:find => [@mock_activity])
@@ -56,9 +86,9 @@ describe SirTracksAlot::Activity do
     end        
   end
   
-  context 'asdf' do
+  context 'when filtering (many)' do
     before do 
-      @activities.each{|a| SirTracksAlot.record(a)}          
+      @activities.each{|a| SirTracksAlot.record(a)}
     end
     
     it "should filter by members of one array" do
@@ -71,9 +101,22 @@ describe SirTracksAlot::Activity do
   end
   
   context 'when getting recent' do
+    before do 
+      @set_activities.each{|a| SirTracksAlot.record(a)} 
+    end
+    
     it "should get recent" do
       SirTracksAlot::Activity.recent(:owner => 'owner').should be_instance_of(Array)
     end
+    
+    it "should purge counted by range, sorting to most recent by last event" do
+      SirTracksAlot::Activity.recent(:owner => 'owner').first.last_event.should == @now.to_s
+    end            
+    
+    it "should purge counted by range, sorting to most recent by last event" do
+      SirTracksAlot::Activity.recent({:owner => 'owner'}, :start => 1).first.last_event.should == '1279709941'
+    end            
+    
   end
   
   context 'when counting' do
@@ -82,42 +125,42 @@ describe SirTracksAlot::Activity do
       SirTracksAlot::Activity.stub!(:find => [@mock_activity])
     end
     
-    it "should look for activities using find options" do
-      SirTracksAlot::Activity.should_receive(:find).with(:owner => 'owner').and_return([@mock_activity])
-      SirTracksAlot::Activity.count(:views, :owner => 'owner')
-    end
-    
-    it "should look for views when counting views" do
-      @mock_activity.should_receive(:views).once.and_return(1)
-      SirTracksAlot::Activity.count(:views, :owner => 'owner')
-    end    
-    
-    it "should not look for views when counting visits" do
-      @mock_activity.should_receive(:views).never
-      SirTracksAlot::Activity.count(:visits, :owner => 'owner')
-    end
-
-    it "should return views and visits" do            
-      SirTracksAlot::Activity.count([:visits, :views], :owner => 'owner').should == [1,2]
-    end
-
-    it "should return visits" do    
-      SirTracksAlot::Activity.count([:visits], :owner => 'owner').should == 1
-    end
-    
-    it "should ignore empty only" do
-      SirTracksAlot::Activity.count([:visits], :owner => 'owner', :only => {}).should == 1      
-    end
-    
-    it "should filter by category" do
-      @mock_activity.should_receive(:category).once.and_return('category')
-      SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/)
-    end
-    
-    it "should filter by category and match returning correct count" do
-      @mock_activity.stub!(:category => 'category')
-      SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/).should == 1      
-    end
+    # it "should look for activities using find options" do
+    #   SirTracksAlot::Activity.should_receive(:find).with(:owner => 'owner').and_return([@mock_activity])
+    #   SirTracksAlot::Activity.count(:views, :owner => 'owner')
+    # end
+    # 
+    # it "should look for views when counting views" do
+    #   @mock_activity.should_receive(:views).once.and_return(1)
+    #   SirTracksAlot::Activity.count(:views, :owner => 'owner')
+    # end    
+    # 
+    # it "should not look for views when counting visits" do
+    #   @mock_activity.should_receive(:views).never
+    #   SirTracksAlot::Activity.count(:visits, :owner => 'owner')
+    # end
+    # 
+    # it "should return views and visits" do            
+    #   SirTracksAlot::Activity.count([:visits, :views], :owner => 'owner').should == [1,2]
+    # end
+    # 
+    # it "should return visits" do    
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner').should == 1
+    # end
+    # 
+    # it "should ignore empty only" do
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :only => {}).should == 1      
+    # end
+    # 
+    # it "should filter by category" do
+    #   @mock_activity.should_receive(:category).once.and_return('category')
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/)
+    # end
+    # 
+    # it "should filter by category and match returning correct count" do
+    #   @mock_activity.stub!(:category => 'category')
+    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/).should == 1      
+    # end
   end
   
   context 'when counting views' do

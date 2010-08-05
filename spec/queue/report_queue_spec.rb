@@ -18,7 +18,7 @@ describe SirTracksAlot::Queue::ReportQueue do
       @activities.each{|a| SirTracksAlot.record(a)}
       SirTracksAlot::Queue::ReportQueue.push('owner', :actor_report, {})      
     end
-
+  
     it "should create a new queue" do      
       SirTracksAlot::Queue::ReportQueue.should_receive(:find_or_create).with(:name => SirTracksAlot::Queue::ReportQueue::QUEUE_NAME).and_return(@queue)
       SirTracksAlot::Queue::ReportQueue.push('owner', 'report', {})
@@ -34,7 +34,7 @@ describe SirTracksAlot::Queue::ReportQueue do
     before do      
       @cache = mock(SirTracksAlot::Queue::ReportCache, :update => true)      
       @activities.each{|a| SirTracksAlot.record(a)}
-      SirTracksAlot::Queue::ReportQueue.push('owner', :actor_report, {:roots => ['categories', 'other_categories'], :actions => ['view']})
+      SirTracksAlot::Queue::ReportQueue.push('owner', :target_report, {:category => ['categories', 'other_categories']})
     end
     
     it "should find existing queue" do
@@ -43,19 +43,19 @@ describe SirTracksAlot::Queue::ReportQueue do
     end
     
     it "should create report cache" do
-      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'actor_report').and_return(@cache)
+      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'target_report').and_return(@cache)
       SirTracksAlot::Queue::ReportQueue.pop      
     end
     
     it "should constantize report by name" do
-      SirTracksAlot::Queue::QueueHelper.should_receive(:constantize).with("SirTracksAlot::Reports::ActorReport").and_return(SirTracksAlot::Reports::ActorReport)
+      SirTracksAlot::Queue::QueueHelper.should_receive(:constantize).with("SirTracksAlot::Reports::TargetReport").and_return(SirTracksAlot::Reports::TargetReport)
       SirTracksAlot::Queue::ReportQueue.pop
     end        
     
     it "should build report HTML" do      
-      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'actor_report').and_return(@cache)
+      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'target_report').and_return(@cache)
       @cache.should_receive(:update) do |options|
-        options[:html].should have_tag('td.actor', /\/users\/user1/)
+        options[:html].should have_tag('td.target', /\/categories\/item1/)
       end
       SirTracksAlot::Queue::ReportQueue.pop
     end        

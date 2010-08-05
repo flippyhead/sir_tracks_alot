@@ -6,10 +6,7 @@ describe SirTracksAlot::Reports::RootStemReport do
   before do 
     RedisSpecHelper.reset
     @activities.each{|a| SirTracksAlot.record(a)}
-  end  
-  
-  it "should render empty" do
-    SirTracksAlot::Reports::FilterReport.render_html(:owner => 'owner')
+    SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories']))    
   end  
   
   context 'building HTML with categories' do

@@ -31,6 +31,38 @@ module DataHelper
   def initialize(*attrs)
     super
     
+    @set_activities = [
+      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
+        :action => 'view', :user_agent => 'agent1', :event => 1279735846}, # 1.day.ago
+        
+      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
+        :action => 'view', :user_agent => 'agent1', :event => 1279735846}, # 1.day.ago
+        
+      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
+        :action => 'view', :user_agent => 'agent1', :event => 1279718578}, # 1.2.days.ago
+
+      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
+        :action => 'view', :user_agent => 'agent1', :event => 1279709941}, # 1.3.days.ago
+
+      {:owner => 'owner', :target => '/categories/item2', :actor => '/users/user2', 
+        :action => 'view', :user_agent => 'agent2', :event => 1279735846}, # 1.day.ago
+        
+      {:owner => 'owner', :target => '/categories', :actor => '/users/user2', 
+        :action => 'view', :user_agent => 'agent2', :event => 1279735846}, # 1.day.ago
+        
+      {:owner => 'owner', :target => '/other_categories/item', :actor => '/users/user1', 
+        :action => 'view', :user_agent => 'agent1', :event => 1279735846}, # 1.day.ago
+        
+      {:owner => 'owner', :target => '/other_categories/item', :actor => '/users/user2', 
+        :action => 'view', :user_agent => 'agent2', :event => 1279735846}, # 1.day.ago
+        
+      {:owner => 'owner', :target => '/other_categories', :actor => '/users/user1', 
+        :action => 'view', :user_agent => 'agent1', :event => 1279735846}, # 1.day.ago
+        
+      {:owner => 'owner', :target => '/other_categories', :actor => '/users/user2', 
+        :action => 'view', :user_agent => 'agent2', :event => 1279735846} # 1.day.ago
+    ]
+    
     @activities = [
       {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', :action => 'view', :user_agent => 'agent1'},
       {:owner => 'owner', :target => '/categories/item2', :actor => '/users/user2', :action => 'view', :user_agent => 'agent2'},

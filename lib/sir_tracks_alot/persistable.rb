@@ -1,7 +1,7 @@
 require 'ohm'
 
 module SirTracksAlot
-  class Persistable < Ohm::Model
+  class Persistable < Ohm::Model    
     attribute :created_at
 
     def self.find_or_create(attributes)
@@ -9,9 +9,28 @@ module SirTracksAlot
       models.empty? ? self.create(attributes.merge(:created_at => Clock.now)) : models.first
     end
 
-    protected    
+    def hash
+      self.id
+    end
+
+    # Simply delegate to == in this example.
+    def eql?(comparee)
+      self == comparee
+    end
+
+    # Objects are equal if they have the same
+    # unique custom identifier.
+    def ==(comparee)
+      self.id == comparee.id
+    end
+
+
+    protected
     
-    def validate
-    end        
+    def self.find_key_from_value(hash, value)
+      hash.each do |k, v|
+        return k if v.include?(value)
+      end
+    end    
   end
 end

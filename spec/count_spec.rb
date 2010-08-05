@@ -6,39 +6,7 @@ describe SirTracksAlot::Count do
   before do 
     RedisSpecHelper.reset
     
-    @activities = [
-      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
-        :action => 'view', :user_agent => 'agent1', :event => 1279735846}, # 1.day.ago
-        
-      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
-        :action => 'view', :user_agent => 'agent1', :event => 1279735846}, # 1.day.ago
-        
-      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
-        :action => 'view', :user_agent => 'agent1', :event => 1279718578}, # 1.2.days.ago
-
-      {:owner => 'owner', :target => '/categories/item1', :actor => '/users/user1', 
-        :action => 'view', :user_agent => 'agent1', :event => 1279709941}, # 1.3.days.ago
-
-      {:owner => 'owner', :target => '/categories/item2', :actor => '/users/user2', 
-        :action => 'view', :user_agent => 'agent2', :event => 1279735846}, # 1.day.ago
-        
-      {:owner => 'owner', :target => '/categories', :actor => '/users/user2', 
-        :action => 'view', :user_agent => 'agent2', :event => 1279735846}, # 1.day.ago
-        
-      {:owner => 'owner', :target => '/other_categories/item', :actor => '/users/user1', 
-        :action => 'view', :user_agent => 'agent1', :event => (1279735846)}, # 1.day.ago
-        
-      {:owner => 'owner', :target => '/other_categories/item', :actor => '/users/user2', 
-        :action => 'view', :user_agent => 'agent2', :event => 1279735846}, # 1.day.ago
-        
-      {:owner => 'owner', :target => '/other_categories', :actor => '/users/user1', 
-        :action => 'view', :user_agent => 'agent1', :event => 1279735846}, # 1.day.ago
-        
-      {:owner => 'owner', :target => '/other_categories', :actor => '/users/user2', 
-        :action => 'view', :user_agent => 'agent2', :event => 1279735846} # 1.day.ago
-    ]
-        
-    @activities.each{|a| SirTracksAlot.record(a)}
+    @set_activities.each{|a| SirTracksAlot.record(a)}
   end  
   
   context 'when creating' do
@@ -56,17 +24,47 @@ describe SirTracksAlot::Count do
     end
   end
   
+  context 'when filtering' do
+    before do
+      SirTracksAlot::Count.count(:owner => 'owner')
+    end
+    
+    it 'should filter by string attribute' do
+      SirTracksAlot::Count.filter(:owner => 'owner').size.should == 13
+    end
+    
+    it 'should filter by array of strings' do
+      SirTracksAlot::Count.filter(:target => ['/categories', '/other_categories/item']).size.should == 2
+    end
+
+    it 'should include all targets when filtering just by ower' do
+      SirTracksAlot::Count.filter(:owner => 'owner').collect{|c| c.target}.compact.sort.should == 
+        ["/categories", "/categories/item1", "/categories/item1", "/categories/item1", "/categories/item2", "/other_categories", "/other_categories/item"].sort
+    end
+
+    it 'should include only filtered targets' do
+      SirTracksAlot::Count.filter(:owner => 'owner', :target => ["/categories", "/categories/item1"]).collect{|c| c.target}.should_not
+        include("/categories/item2")
+    end    
+  end
+  
   context 'when counting' do
     before do
-      @counts = SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories'], :actions => ['view']))
+      @counts = SirTracksAlot::Count.count(:owner => 'owner', :category => ['categories'], :action => ['view'])
     end
     
     it "should count all activities for owner" do      
-      SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner')).size.should == 7 # one for each unique target, time combo
+      SirTracksAlot::Count.count(:owner => 'owner')
+      SirTracksAlot::Count.find(:owner => 'owner').size.should == 13 # one for each unique target, time combo
     end
 
-    it "should count all activities for owner" do      
-      SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner')).size.should == 7 # one for each unique target, time combo
+    it "should set to counted all activities counted" do      
+      SirTracksAlot::Count.count(:owner => 'owner')
+      SirTracksAlot::Activity.filter(:counted => "0").should be_empty
+    end
+    
+    it "should only count activities once" do
+      SirTracksAlot::Count.count(:owner => 'owner', :category => ['categories'], :action => ['view']).should be_empty
     end
     
     context 'views' do    

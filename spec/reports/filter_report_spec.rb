@@ -1,16 +1,13 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
-describe SirTracksAlot::Reports::ActivityReport do 
+describe SirTracksAlot::Reports::FilterReport do 
   include DataHelper
   
   before do 
     RedisSpecHelper.reset
     @report_options = {:owner => 'owner'}
     @activities.each{|a| SirTracksAlot.record(a)}
-  end  
-  
-  it "should render empty" do
-    SirTracksAlot::Reports::FilterReport.render_html(@report_options)
+    SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories']))
   end  
   
   context 'filtering things with only' do
@@ -23,6 +20,7 @@ describe SirTracksAlot::Reports::ActivityReport do
           'blank' =>  {:target => /blanks/}
         }
       }
+      
       @html = SirTracksAlot::Reports::FilterReport.render_html(@report_options)
     end
     

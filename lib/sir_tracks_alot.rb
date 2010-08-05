@@ -17,6 +17,8 @@ module SirTracksAlot
   
   autoload :Persistable, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot persistable.rb])
   autoload :Activity, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot activity.rb])
+  autoload :EventHelper, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot event_helper.rb])
+  autoload :FilterHelper, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot filter_helper.rb])
   autoload :Count, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot count.rb])
   autoload :Clock, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot clock.rb])  
   
@@ -55,7 +57,9 @@ module SirTracksAlot
     
     raise RecordInvalidError.new("Activity not valid: #{activity.errors.inspect}") unless activity.valid?
 
-    activity.update(:last_event => event )
+raise "EVENT NIL" if event.nil?
+
+    activity.update(:last_event => event)
     activity.events << event
     activity
   end
@@ -113,10 +117,6 @@ module SirTracksAlot
     autoload :ReportCache, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot queue report_cache.rb])
     autoload :ReportConfig, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot queue report_config.rb])
     autoload :QueueHelper, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot queue queue_helper.rb])
-  end
-  
-  module Counters
-    autoload :TargetCounter, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot counters target_counter.rb])
   end
   
   module Reports

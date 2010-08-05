@@ -1,13 +1,16 @@
 module SirTracksAlot
   class Count < Persistable
+    extend FilterHelper
+    
     ACTIONS = [:create, :view, :login, :search, :update, :destroy]
     
+    attribute :created_at 
     attribute :date       # 10/01/2010
     attribute :hour       # 1 - 23
     attribute :owner      # 123123
     attribute :actor      # /users/peter-brown   
     attribute :target     # /discussions/23423
-    attribute :category   # **automatically set**
+    attribute :category   
     attribute :views
     attribute :visits
     
@@ -18,47 +21,54 @@ module SirTracksAlot
     index :target
     index :category
 
-
     def self.count(options)
-      counts = {}
-      actions = options.actions || []
-      roots = options.roots || []
-      owner = options.owner
-      target = options.target
+      options = OpenStruct.new(options) if options.kind_of?(Hash)
       
-      activities = Activity.filter(:owner => owner, :target => target, :action => actions, :category => roots)
-
-      activities.each do |activity|
-        activity.views(:hourly).each do |time, count|
-          date, hour = time.split(' ')
-          
-          counts[activity.target] ||= {}
-          counts[activity.target][time] ||= Count.new(:owner => owner, :target => activity.target, :views => 0, :visits => 0, :date => date, :hour => hour)
-          counts[activity.target][time].views += count
-        end
-        
-        activity.visits(options.session_duration, :hourly).each do |time, count|
-          date, hour = time.split(' ')
-          
-          counts[activity.target] ||= {}
-          counts[activity.target][time] ||= Count.new(:owner => owner, :target => activity.target, :views => 0, :visits => 0, :date => date, :hour => hour)
-          counts[activity.target][time].visits += count
-        end
-      end
-      
-      counts.each do |target, groups|
-        groups.each do |time, count|
-          count.save
-        end
-      end
-
-      counts.values.collect{|v| v.values}.flatten
+      rollup(Activity.filter(:owner => options.owner, 
+          :target => options.target, 
+          :action => options.action||[], 
+          :category => options.category || [], 
+          :counted => '0'), 
+        options.session_duration
+      )
     end
     
+    def self.rollup(activities, session_duration)
+      counts = []
+
+      activities.each do |activity|        
+        activity.views(:hourly).each do |time, views|          
+          date, hour = time.split(' ')
+          counts << create_by_activity({:owner => activity.owner, :category => activity.category, :target => activity.target, :date => date, :hour => hour}, views, 0)
+          counts << create_by_activity({:owner => activity.owner, :category => activity.category, :actor => activity.actor, :date => date, :hour => hour}, views, 0)
+        end
+
+        activity.visits(session_duration, :hourly).each do |time, visits|
+          date, hour = time.split(' ')
+          counts << create_by_activity({:owner => activity.owner, :category => activity.category, :target => activity.target, :date => date, :hour => hour}, 0, visits)
+          counts << create_by_activity({:owner => activity.owner, :category => activity.category, :actor => activity.actor, :date => date, :hour => hour}, 0, visits)
+        end
+
+        activity.counted!        
+      end
+      
+      counts
+    end
     
+    def self.create_by_activity(attributes, views = 0, visits = 0)
+      count = Count.find_or_create(attributes)
         
-    private
+      count.views ||= 0; count.visits ||= 0
+
+      count.views  = count.views.to_i + views 
+      count.visits = count.visits.to_i + visits
+      
+      count.save        
+    end
     
+            
+    private
+
     def validate
       assert_present :owner
       assert_present :views

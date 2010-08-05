@@ -5,19 +5,13 @@ describe SirTracksAlot::Reports::ActorReport do
   
   before do 
     RedisSpecHelper.reset
-    
-    counts = {"/users/user1" => [2, 1], "/users/user2" => [2, 1], "/users/user3" => [0, 0]}    
-    @report_attributes = {:owner => 'owner', :roots => ['categories'], :actions => ['view'], :counts => counts}    
+    @activities.each{|a| SirTracksAlot.record(a)}
   end  
-  
-  it "should find activities when building data" do
-    @html = SirTracksAlot::Reports::ActorReport.render_html(@report_attributes)    
-  end
   
   context 'building HTML' do
     before do 
-      SirTracksAlot.record(:owner => 'other_owner', :target => '/other_categories/item', :actor => '/users/user', :action => 'view')
-      @html = SirTracksAlot::Reports::ActorReport.render_html(@report_attributes)
+      @counts = SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories']))
+      @html = SirTracksAlot::Reports::ActorReport.render_html(:counts => @counts)
     end
     
     it "include target row" do
