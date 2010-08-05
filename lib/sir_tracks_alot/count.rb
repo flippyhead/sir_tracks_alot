@@ -52,7 +52,7 @@ module SirTracksAlot
       return [visits, views] if what == [:visits, :views]
       return views if what == [:views]
       return visits if what == [:visits]
-      raise ArgumentError("what must be one or more of :views, :visits")      
+      raise ArgumentError("what must be one or both of :views, :visits")      
     end
 
     def self.count(options)
@@ -99,6 +99,10 @@ module SirTracksAlot
       
       count.save        
     end
+    
+    def to_hash
+      super.merge(:owner => owner, :actor => actor, :target => target, :category => category, :date => date, :hour => hour, :views => views, :visits => visits) 
+    end    
     
             
     private
