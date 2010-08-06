@@ -57,9 +57,7 @@ module SirTracksAlot
     
     raise RecordInvalidError.new("Activity not valid: #{activity.errors.inspect}") unless activity.valid?
 
-raise "EVENT NIL" if event.nil?
-
-    activity.update(:last_event => event)
+    activity.update(:last_event => event, :counted => '0')
     activity.events << event
     activity
   end

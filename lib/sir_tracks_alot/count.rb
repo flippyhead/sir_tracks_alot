@@ -55,7 +55,7 @@ module SirTracksAlot
       raise ArgumentError("what must be one or both of :views, :visits")      
     end
 
-    def self.count(options)
+    def self.count(options = {})
       options = OpenStruct.new(options) if options.kind_of?(Hash)
       
       rollup(Activity.filter(:owner => options.owner, 

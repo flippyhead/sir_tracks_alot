@@ -59,6 +59,10 @@ describe SirTracksAlot, 'when recording' do
     SirTracksAlot.record(@record_attributes)
   end
 
+  it "should force new activity to uncounted" do
+    SirTracksAlot.record(@record_attributes.merge(:counted => '1')).counted.should == '0'
+  end
+
   it "should add custom event if provided" do
     SirTracksAlot::Clock.should_receive(:now).once # only for activity create, not for events date
     SirTracksAlot.record(@record_attributes.merge(:event => Time.now.utc.to_i))
