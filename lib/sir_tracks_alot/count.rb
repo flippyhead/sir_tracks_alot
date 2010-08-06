@@ -101,10 +101,10 @@ module SirTracksAlot
     end
     
     def to_hash
-      super.merge(:owner => owner, :actor => actor, :target => target, :category => category, :date => date, :hour => hour, :views => views, :visits => visits) 
+      {:owner => owner, :actor => actor, :target => target, :category => category, :date => date, :hour => hour, :views => views, :visits => visits, :id => id}
     end    
-    
-            
+
+
     private
 
     def validate

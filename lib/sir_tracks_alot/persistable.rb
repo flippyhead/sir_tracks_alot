@@ -24,6 +24,9 @@ module SirTracksAlot
       self.id == comparee.id
     end
 
+    def to_hash
+      super
+    end
 
     protected
     

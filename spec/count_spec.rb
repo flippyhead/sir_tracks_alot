@@ -21,6 +21,10 @@ describe SirTracksAlot::Count do
       SirTracksAlot::Count.create(@count_attributes[0])
       SirTracksAlot::Count.create(@count_attributes[0]).should_not be_valid
     end
+    
+    it "should have a to_hash with attributes" do
+      SirTracksAlot::Count.create(@count_attributes[0]).to_hash.should ==  {:owner=>"owner", :views=>1, :visits=>2, :hour=>5, :target=>"/categories/item1", :id=>"1", :date=>"07/01/2010", :category=>nil, :actor=>"/users/user1"}
+    end
   end
   
   context 'when filtering' do
@@ -47,7 +51,7 @@ describe SirTracksAlot::Count do
     end    
   end
   
-  context 'when totally' do
+  context 'when totalling' do
     before do 
       @mock_activity = mock(SirTracksAlot::Activity, :visits => 1, :views => 2)
       SirTracksAlot::Count.stub!(:filter => [@mock_activity])
