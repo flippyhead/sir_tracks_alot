@@ -8,14 +8,9 @@ module SirTracksAlot
       def setup
         super
         column_names = options.column_names || COLUMN_NAMES
-        counts = options.counts || {}
+        rows = options.rows || []
         
-        table = Table(column_names) do |t|
-          counts.each do |count|
-            t << [count.target, count.visits, count.views]
-          end
-        end
-        
+        table = Table(column_names, :data => rows)
         table.sort_rows_by!('page views', :order => :descending)
         
         self.data = table

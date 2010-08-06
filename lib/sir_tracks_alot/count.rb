@@ -21,24 +21,6 @@ module SirTracksAlot
     index :target
     index :category
 
-    # def self.count(what, options_for_find)      
-    #   what = [what] unless what.kind_of?(Array)      
-    #   views, visits = 0, 0      
-    #   session_duration = options_for_find.delete(:session_duration)
-    #   resolution = options_for_find.delete(:resolution)
-    #   
-    #   filter(options_for_find) do |activity|
-    #     views += activity.views(resolution) if what.include?(:views)
-    #     visits += activity.visits(session_duration) if what.include?(:visits)
-    #   en+d      
-    #         
-    #   return [views, visits] if what == [:views, :visits]
-    #   return [visits, views] if what == [:visits, :views]
-    #   return views if what == [:views]
-    #   return visits if what == [:visits]
-    #   raise ArgumentError("what must be one or more of :views, :visits")
-    # end        
-
     def self.total(what, options_for_find)
       what = [what] unless what.kind_of?(Array)      
       views, visits = 0, 0      
@@ -54,12 +36,26 @@ module SirTracksAlot
       return visits if what == [:visits]
       raise ArgumentError("what must be one or both of :views, :visits")      
     end
+    
+    def self.rows(options_for_find)
+      groups = {}
+      
+      filter(options_for_find) do |count|
+        source = count.target || count.actor # don't currently support counts with both actor and target set
+        groups[source] ||= [0,0]
+        groups[source][0] += count.views.to_i
+        groups[source][1] += count.visits.to_i
+      end
+      
+      groups.collect{|g| g.flatten}
+    end
 
     def self.count(options = {})
       options = OpenStruct.new(options) if options.kind_of?(Hash)
       
       rollup(Activity.filter(:owner => options.owner, 
           :target => options.target, 
+          :actor => options.actor, 
           :action => options.action||[], 
           :category => options.category || [], 
           :counted => '0'), 

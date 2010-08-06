@@ -24,12 +24,12 @@ module SirTracksAlot
             t << [target, count[0], count[1]]
           end          
         end
-        
+
         table.sort_rows_by!('page views', :order => :descending)
-        
+
         self.data = table
       end  
-                  
+
       module Helpers
         include Report::Helpers        
       end

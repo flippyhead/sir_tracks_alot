@@ -23,7 +23,7 @@ describe SirTracksAlot::Count do
     end
     
     it "should have a to_hash with attributes" do
-      SirTracksAlot::Count.create(@count_attributes[0]).to_hash.should ==  {:owner=>"owner", :views=>1, :visits=>2, :hour=>5, :target=>"/categories/item1", :id=>"1", :date=>"07/01/2010", :category=>nil, :actor=>"/users/user1"}
+      SirTracksAlot::Count.create(@count_attributes[0]).to_hash.should == {:owner=>"owner", :views=>1, :visits=>2, :hour=>5, :target=>"/categories/item1", :id=>"1", :date=>"07/01/2010", :category=>nil, :actor=>"/users/user1"}
     end
   end
   
@@ -31,6 +31,11 @@ describe SirTracksAlot::Count do
     before do
       SirTracksAlot::Count.count(:owner => 'owner')
     end
+    
+    it "should row" do
+      SirTracksAlot::Count.rows(:owner => 'owner').should == ''
+    end
+    
     
     it 'should filter by string attribute' do
       SirTracksAlot::Count.filter(:owner => 'owner').size.should == 13
@@ -61,6 +66,7 @@ describe SirTracksAlot::Count do
       SirTracksAlot::Count.should_receive(:filter).with(:owner => 'owner').and_return([@mock_activity])
       SirTracksAlot::Count.total(:views, :owner => 'owner')
     end
+    
     
     # it "should look for views when counting views" do
     #   @mock_activity.should_receive(:views).once.and_return(1)

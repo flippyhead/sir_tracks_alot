@@ -6,21 +6,26 @@ describe SirTracksAlot::Reports::TargetReport do
   before do 
     RedisSpecHelper.reset
     @activities.each{|a| SirTracksAlot.record(a)}
+    SirTracksAlot::Count.count(:owner => 'owner')
   end  
   
   context 'building HTML' do
     before do             
-      @counts = SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories']))
-      @html = SirTracksAlot::Reports::TargetReport.render_html(:counts => @counts)
+      rows = SirTracksAlot::Count.rows(:owner => 'owner')
+      @html = SirTracksAlot::Reports::TargetReport.render_html(:rows => rows, :report_class => 'customClass')
     end
     
     it_should_behave_like 'all reports'
     
-    it "include target row" do    
+    it "should include target row" do    
       @html.should have_tag('td.target', /\/categories\/item/)
     end
 
-    it "include count row" do      
+    it "should have custom class" do    
+      @html.should have_tag('div.customClass')
+    end
+
+    it "should include count row" do      
       @html.should have_tag('td.count', /1/)
     end
 

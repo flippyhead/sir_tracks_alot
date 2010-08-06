@@ -41,7 +41,6 @@ module SirTracksAlot
     end              
 
     # Delete counted activities, leaving a default of the 500 most recent for the provided search criteria
-    # If left blank, purges all but the most recent Limit
     def self.purge!(options_for_find = {}, options_for_sort = {:order => 'DESC'})
       recent(options_for_find.merge(:counted => 1), options_for_sort).each{|a| a.delete}
     end
