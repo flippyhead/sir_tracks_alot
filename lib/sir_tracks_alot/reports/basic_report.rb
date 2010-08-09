@@ -13,7 +13,7 @@ module SirTracksAlot
 
         self.data = grouping
       end  
-                  
+
       module Helpers
         include Report::Helpers
       end

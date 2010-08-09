@@ -32,10 +32,14 @@ describe SirTracksAlot::Count do
       SirTracksAlot::Count.count(:owner => 'owner')
     end
     
-    it "should row" do
-      SirTracksAlot::Count.rows(:owner => 'owner').should == ''
-    end
+    it "should build rows" do
+      SirTracksAlot::Count.rows(:owner => 'owner').should == [["/categories", 1, 1], ["/categories/item1", 4, 4], 
+        ["/categories/item2", 1, 1], ["/users/user1", 6, 6], ["/other_categories", 2, 2], ["/users/user2", 4, 4], ["/other_categories/item", 2, 2]]
+    end    
     
+    it "should build rows with custom title" do
+      SirTracksAlot::Count.rows({:owner => 'owner'}, 'title').should == [["title", 20, 20]]
+    end
     
     it 'should filter by string attribute' do
       SirTracksAlot::Count.filter(:owner => 'owner').size.should == 13

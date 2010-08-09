@@ -119,6 +119,7 @@ module SirTracksAlot
   
   module Reports
     autoload :Report, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot reports report.rb])
+    autoload :SimpleReport, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot reports simple_report.rb])
     autoload :BasicReport, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot reports basic_report.rb])
     autoload :SirTracksAlotReport, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot reports trackable_report.rb])
     autoload :TargetReport, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot reports target_report.rb])

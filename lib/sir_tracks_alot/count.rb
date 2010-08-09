@@ -37,14 +37,14 @@ module SirTracksAlot
       raise ArgumentError("what must be one or both of :views, :visits")      
     end
     
-    def self.rows(options_for_find)
+    def self.rows(options_for_find, title = nil)
       groups = {}
       
-      filter(options_for_find) do |count|
-        source = count.target || count.actor # don't currently support counts with both actor and target set
-        groups[source] ||= [0,0]
-        groups[source][0] += count.views.to_i
-        groups[source][1] += count.visits.to_i
+      filter(options_for_find) do |count|        
+        t = title || count.target || count.actor # don't currently support counts with both actor and target set
+        groups[t] ||= [0,0]
+        groups[t][0] += count.views.to_i
+        groups[t][1] += count.visits.to_i
       end
       
       groups.collect{|g| g.flatten}

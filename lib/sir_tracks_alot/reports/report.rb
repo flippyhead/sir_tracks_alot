@@ -3,12 +3,26 @@ module SirTracksAlot
     class Report < Ruport::Controller
       attr_accessor :all
       
+      # Accepts either:
+      # options: {'title' => {:owner => 'xxx'}}
+      # options: [{:owner => 'xxx'}]
+      def self.build_rows(filters)
+        rows = []          
+        filters = {nil => filters} if filters.kind_of?(Array)
+
+        filters.each do |title, options_for_find|
+          rows += SirTracksAlot::Count.rows(options_for_find, title)
+        end
+
+        rows
+      end
+      
       def setup
         self.data = []        
         options.report_class ||= ''
         options.report_title ||= 'Report'
-      end
-      
+      end      
+
       module Helpers
         def self.handle(name, &block)
           @@handlers ||= {}

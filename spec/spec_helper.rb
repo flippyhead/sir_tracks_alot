@@ -13,18 +13,10 @@ Bundler.require(:development)
 
 require 'spec/reports/shared_report_specs'
 require 'sir_tracks_alot'
+require 'spec/redis_spec_helper'
 
 Spec::Runner.configure do |config|
   config.include(RspecHpricotMatchers)
-end
-
-class RedisSpecHelper
-  TEST_OPTIONS = {:db => 15}
-  
-  def self.reset   
-    Ohm.connect(TEST_OPTIONS)
-    Ohm.flush
-  end
 end
 
 module DataHelper

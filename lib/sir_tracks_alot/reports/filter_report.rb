@@ -26,7 +26,6 @@ module SirTracksAlot
         options.filters ||= {}
         options.column_names ||= COLUMN_NAMES
         
-        
         options.filters.each do |title, options_for_find|
           Count.filter(options_for_find.merge(:owner => options.owner)).each do |count|
             counts[title] ||= [0,0]
