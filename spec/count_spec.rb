@@ -125,6 +125,10 @@ describe SirTracksAlot::Count do
     end
     
     context 'views' do    
+      it "should increment views" do
+
+      end
+      
       it "should include counts by hour" do
         @counts[0].hour.should == '18'        
       end

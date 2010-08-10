@@ -5,33 +5,37 @@ module SirTracksAlot
     # Regular Expression filters match against retrieved attribute values
     # 
     # filter(:actor => 'user1', :target => /\/targets\/\d+/, :action => ['view', 'create'], :category => ['/root', '/other_root'])
-    def filter(options_for_find, &block)      
+    def filter(filters, &block)      
       items = []
       all = []
       
-      strings, matchers, arrays = extract_filter_options(options_for_find)
+      filters = [filters] unless filters.kind_of?(Array)
       
-      unless arrays.empty?
-        (arrays.values.inject{|a, b| a.product b}).each do |combo|
-          terms = {}; combo.each{|c| terms[find_key_from_value(arrays, c)] = c}
-          all += find(terms.merge(strings)).to_a
-        end
-      else
-        all = find(strings)
-      end
-
-      all.each do |item|
-        pass = true
-        
-        matchers.each do |key, matcher|
-          pass = false if !matcher.match(item.send(key))
+      filters.each do |options_for_find|
+        strings, matchers, arrays = extract_filter_options(options_for_find)
+      
+        unless arrays.empty?
+          (arrays.values.inject{|a, b| a.product b}).each do |combo|
+            terms = {}; combo.each{|c| terms[find_key_from_value(arrays, c)] = c}
+            all += find(terms.merge(strings)).to_a
+          end
+        else
+          all = find(strings)
         end
 
-        next unless pass
+        all.each do |item|
+          pass = true
         
-        yield item if block_given?
+          matchers.each do |key, matcher|
+            pass = false if !matcher.match(item.send(key))
+          end
+
+          next unless pass
         
-        items << item
+          yield item if block_given?
+        
+          items << item
+        end
       end
       
       items      

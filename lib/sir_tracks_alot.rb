@@ -92,7 +92,7 @@ module SirTracksAlot
     return @log if @log
     
     @log = Logging::Logger[self]
-    @log.level = :debug
+    @log.level = ENV['SIR_TRACKS_ALOT_LOG_LEVEL'] || 'warn'
     @log
   end  
   

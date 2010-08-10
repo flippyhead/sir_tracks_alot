@@ -10,6 +10,13 @@ describe SirTracksAlot::Reports::SimpleReport do
   end  
   
   context 'building HTML' do    
+    context 'using filters' do
+      it "should use regular expressions" do
+        SirTracksAlot::Reports::SimpleReport.render_html(:filters => [{:owner => 'owner', :target => /.+/}], 
+          :report_class => 'customClass').should_not have_tag('td.target', /\/users\/user1/)
+      end
+    end
+    
     context 'for table reports' do
       before do             
         @html = SirTracksAlot::Reports::SimpleReport.render_html(:filters => [{:owner => 'owner'}], 
@@ -21,15 +28,15 @@ describe SirTracksAlot::Reports::SimpleReport do
       it "should include target row" do    
         @html.should have_tag('td.target', /\/categories\/item/)
       end
-
+    
       it "should have custom class" do    
         @html.should have_tag('div.customClass')
       end
-
+    
       it "should include count row" do      
         @html.should have_tag('td.count', /1/)
       end
-
+    
       it "should ignore other owners" do
         @html.should_not have_tag('td.target', '/other_categories/item')
       end
@@ -42,11 +49,11 @@ describe SirTracksAlot::Reports::SimpleReport do
           :column_names => ['target', 'column 1', 'column 2'],
           :report_class => 'customClass')
       end
-
+    
       it "should include target group" do
         @html.should have_tag('h2', /\/categories\/item/)
       end
-
+    
       it "should include custom column names" do
         @html.should have_tag('th.column_1')
       end      

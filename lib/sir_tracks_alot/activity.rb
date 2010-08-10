@@ -46,8 +46,11 @@ module SirTracksAlot
     end
 
     # set this activity to counted
+    # and clear the recorded events
     def counted!
       update(:counted => '1')
+      events.clear
+      true
     end
 
     # is this activity counted?

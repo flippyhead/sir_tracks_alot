@@ -34,7 +34,7 @@ describe SirTracksAlot::Queue::ReportQueue do
     before do      
       @cache = mock(SirTracksAlot::Queue::ReportCache, :update => true)      
       @activities.each{|a| SirTracksAlot.record(a)}
-      SirTracksAlot::Queue::ReportQueue.push('owner', :target_report, {:category => ['categories', 'other_categories']})
+      SirTracksAlot::Queue::ReportQueue.push('owner', :target_report, {:filters => {:category => ['categories', 'other_categories']}})
     end
     
     it "should find existing queue" do

@@ -11,20 +11,18 @@ Ohm.connect(:host => '127.0.0.1', :timeout => 2, :db => 15)
 class DataBuilder
   START_DATE = 1272559940
   ONE_HOUR = 3600
-  OWNER = 'owner'
-  REF_COUNT = 10
   
-  def self.build(count = 1000)
+  def self.build(count = 1000, owner = 'owner', ref_count = 100)
     puts "** Building activities..."
     
     count.times do |i|
       event = START_DATE + (ONE_HOUR * i)
-      target = "/targets/#{rand REF_COUNT}"
-      actor = "/actors/#{rand REF_COUNT}"
-      user_agent = "user_agents-#{rand REF_COUNT}"
+      target = "/targets/#{rand ref_count}"
+      actor = "/actors/#{rand ref_count}"
+      user_agent = "user_agents-#{rand ref_count}"
       view = 'view'
       
-      SirTracksAlot.record(:owner => OWNER, :event => event, :target => target, :actor => actor, :user_agent => user_agent, :action => view)
+      SirTracksAlot.record(:owner => owner, :event => event, :target => target, :actor => actor, :user_agent => user_agent, :action => view)
     end
     
     puts "** Done building #{count} activities."

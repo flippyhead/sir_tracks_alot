@@ -56,7 +56,7 @@ module SirTracksAlot
       rollup(Activity.filter(:owner => options.owner, 
           :target => options.target, 
           :actor => options.actor, 
-          :action => options.action||[], 
+          :action => options.action || [], 
           :category => options.category || [], 
           :counted => '0'), 
         options.session_duration

@@ -10,7 +10,7 @@ module SirTracksAlot
 
       def self.push(owner, report, options)
         config = ReportConfig.find_or_create(:owner => owner.to_s, :report => report.to_s)
-        config.options = options.merge(:owner => owner.to_s) # reports require owner, should be sync'd with config owner        
+        config.options = options
         queue = self.find_or_create(:name => QUEUE_NAME)
         queue.queue << config.id
       end
@@ -23,10 +23,9 @@ module SirTracksAlot
           return false
         end
         
-        queue = queue.first
+        queue = queue.first        
+        config = ReportConfig[queue.queue.pop] # raw gets us just the id's, pop to remove the las one, it's a queue!      
         
-        config = ReportConfig[queue.queue.pop] # raw gets us just the id's, pop to remove the las one, it's a queue!
-      
         process(config)
       end
     
@@ -37,8 +36,7 @@ module SirTracksAlot
 
         begin
           report = QueueHelper.constantize(QueueHelper.camelize("SirTracksAlot::Reports::#{config.report.capitalize}"))
-          counts = Count.filter(config.options)
-          html = report.render_html(:counts => counts)
+          html = report.render_html(config.options)
           cache = ReportCache.find_or_create(:owner => config.owner, :report => config.report)
           cache.update(:html => html)
         rescue Exception => e
