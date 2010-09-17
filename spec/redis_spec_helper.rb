@@ -1,5 +1,5 @@
 class RedisSpecHelper
-  TEST_OPTIONS = {:db => 15}
+  TEST_OPTIONS = {:db => 13}
   
   def self.reset   
     Ohm.connect(TEST_OPTIONS)

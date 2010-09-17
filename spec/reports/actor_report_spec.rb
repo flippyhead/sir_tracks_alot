@@ -10,7 +10,7 @@ describe SirTracksAlot::Reports::ActorReport do
   
   context 'building HTML' do
     before do 
-      @counts = SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories']))
+      @counts = SirTracksAlot::Count.count(:owner => 'owner')
       @html = SirTracksAlot::Reports::ActorReport.render_html(:counts => @counts)
     end
     

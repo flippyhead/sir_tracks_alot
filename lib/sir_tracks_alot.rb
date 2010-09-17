@@ -1,16 +1,18 @@
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
-require "rubygems"
-require "bundler"
-Bundler.setup
-Bundler.require 
-
-# require 'logging'
-# require 'twitter'
-# require 'ruport'
-# require 'ohm'
-# require 'redis'
+begin
+  require "rubygems"
+  require "bundler"
+  Bundler.setup
+  Bundler.require
+# rescue LoadError
+  require 'logging'
+  require 'twitter'
+  require 'ruport'
+  require 'ohm'
+  require 'redis'  
+end
 
 module SirTracksAlot
   TRACKABLE_ROOT = "#{File.dirname(__FILE__)}/.."
@@ -20,6 +22,7 @@ module SirTracksAlot
   autoload :EventHelper, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot event_helper.rb])
   autoload :FilterHelper, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot filter_helper.rb])
   autoload :Count, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot count.rb])
+  autoload :Summary, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot summary.rb])
   autoload :Clock, File.join(File.dirname(__FILE__), *%w[sir_tracks_alot clock.rb])  
   
   class SirTracksAlotError < StandardError    

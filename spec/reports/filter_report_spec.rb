@@ -7,7 +7,7 @@ describe SirTracksAlot::Reports::FilterReport do
     RedisSpecHelper.reset
     @report_options = {:owner => 'owner'}
     @activities.each{|a| SirTracksAlot.record(a)}
-    SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories']))
+    SirTracksAlot::Count.count(:owner => 'owner')
   end  
   
   context 'filtering things with only' do

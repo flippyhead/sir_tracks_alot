@@ -4,7 +4,6 @@ module SirTracksAlot
     extend FilterHelper 
     
     ACTIONS = [:create, :view, :login, :search, :update, :destroy]    
-    LIMIT = 500
 
     attribute :created_at
     attribute :last_event # Clock.now
@@ -36,12 +35,12 @@ module SirTracksAlot
     end
 
     # find recent activities
-    def self.recent(options_for_find, options_for_sort = {:order => 'DESC', :limit => LIMIT})
+    def self.recent(options_for_find, options_for_sort = {:order => 'DESC', :limit => 500})
       find(options_for_find).sort_by(:last_event, options_for_sort)
     end              
 
-    # Delete counted activities, leaving a default of the 500 most recent for the provided search criteria
-    def self.purge!(options_for_find = {}, options_for_sort = {:order => 'DESC'})
+    # Delete 500 counted activities, leaving a default of the 500 most recent for the provided search criteria
+    def self.purge!(options_for_find = {}, options_for_sort = {:order => 'DESC', :start => 500, :limit => 500})
       recent(options_for_find.merge(:counted => 1), options_for_sort).each{|a| a.delete}
     end
 

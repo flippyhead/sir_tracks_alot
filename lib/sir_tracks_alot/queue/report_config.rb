@@ -6,9 +6,11 @@ module SirTracksAlot
     
       attribute :created_at
       attribute :report
+      attribute :name
       attribute :owner
       attribute :options_store
 
+      index :name
       index :report
       index :owner
 
@@ -24,6 +26,7 @@ module SirTracksAlot
       def validate
         assert_present :report
         assert_present :owner      
+        assert_present :name
       end
     end
   end

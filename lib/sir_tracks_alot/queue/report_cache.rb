@@ -4,8 +4,10 @@ module SirTracksAlot
       attribute :created_at
       attribute :report
       attribute :owner
+      attribute :name
       attribute :html
     
+      index :name
       index :report
       index :owner
     end

@@ -8,8 +8,8 @@ module SirTracksAlot
       index :name
       list :queue # of ReportConfigs
 
-      def self.push(owner, report, options)
-        config = ReportConfig.find_or_create(:owner => owner.to_s, :report => report.to_s)
+      def self.push(owner, report, name, options)
+        config = ReportConfig.find_or_create(:owner => owner.to_s, :report => report.to_s, :name => name.to_s)
         config.options = options
         queue = self.find_or_create(:name => QUEUE_NAME)
         queue.queue << config.id
@@ -28,7 +28,7 @@ module SirTracksAlot
         
         process(config)
       end
-    
+
       def self.process(config)
         return false if config.nil?
 
@@ -37,7 +37,7 @@ module SirTracksAlot
         begin
           report = QueueHelper.constantize(QueueHelper.camelize("SirTracksAlot::Reports::#{config.report.capitalize}"))
           html = report.render_html(config.options)
-          cache = ReportCache.find_or_create(:owner => config.owner, :report => config.report)
+          cache = ReportCache.find_or_create(:owner => config.owner, :report => config.report, :name => config.name)
           cache.update(:html => html)
         rescue Exception => e
           SirTracksAlot.log.fatal("Error building report #{config.report} for #{config.owner}: #{e}")

@@ -16,17 +16,17 @@ describe SirTracksAlot::Queue::ReportQueue do
     before do
       @config = mock(SirTracksAlot::Queue::ReportConfig, :options => {}, :options= => true, :id => 1)
       @activities.each{|a| SirTracksAlot.record(a)}
-      SirTracksAlot::Queue::ReportQueue.push('owner', :actor_report, {})      
+      SirTracksAlot::Queue::ReportQueue.push('owner', :actor_report, 'report', {})      
     end
   
     it "should create a new queue" do      
       SirTracksAlot::Queue::ReportQueue.should_receive(:find_or_create).with(:name => SirTracksAlot::Queue::ReportQueue::QUEUE_NAME).and_return(@queue)
-      SirTracksAlot::Queue::ReportQueue.push('owner', 'report', {})
+      SirTracksAlot::Queue::ReportQueue.push('owner', 'report', 'report', {})
     end    
     
     it "should create report config" do
-      SirTracksAlot::Queue::ReportConfig.should_receive(:find_or_create).with(:owner => 'owner', :report => 'report').once.and_return(@config)
-      SirTracksAlot::Queue::ReportQueue.push('owner', 'report', {})
+      SirTracksAlot::Queue::ReportConfig.should_receive(:find_or_create).with(:owner => 'owner', :report => 'report', :name => 'report').once.and_return(@config)
+      SirTracksAlot::Queue::ReportQueue.push('owner', 'report', 'report', {})
     end    
   end
   
@@ -34,7 +34,7 @@ describe SirTracksAlot::Queue::ReportQueue do
     before do      
       @cache = mock(SirTracksAlot::Queue::ReportCache, :update => true)      
       @activities.each{|a| SirTracksAlot.record(a)}
-      SirTracksAlot::Queue::ReportQueue.push('owner', :target_report, {:filters => {:category => ['categories', 'other_categories']}})
+      SirTracksAlot::Queue::ReportQueue.push('owner', :target_report, 'report', {:filters => {:category => ['/categories', '/other_categories']}})
     end
     
     it "should find existing queue" do
@@ -43,7 +43,7 @@ describe SirTracksAlot::Queue::ReportQueue do
     end
     
     it "should create report cache" do
-      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'target_report').and_return(@cache)
+      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'target_report', :name => 'report').and_return(@cache)
       SirTracksAlot::Queue::ReportQueue.pop      
     end
     
@@ -52,8 +52,8 @@ describe SirTracksAlot::Queue::ReportQueue do
       SirTracksAlot::Queue::ReportQueue.pop
     end        
     
-    it "should build report HTML" do      
-      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'target_report').and_return(@cache)
+    it "should build report HTML" do
+      SirTracksAlot::Queue::ReportCache.should_receive(:find_or_create).with(:owner => 'owner', :report => 'target_report', :name => 'report').and_return(@cache)
       @cache.should_receive(:update) do |options|
         options[:html].should have_tag('td.target', /\/categories\/item1/)
       end

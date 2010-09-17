@@ -13,26 +13,32 @@ module SirTracksAlot
       
       filters.each do |options_for_find|
         strings, matchers, arrays = extract_filter_options(options_for_find)
-      
+
         unless arrays.empty?
           (arrays.values.inject{|a, b| a.product b}).each do |combo|
+            combo = [combo] unless combo.kind_of?(Array)
             terms = {}; combo.each{|c| terms[find_key_from_value(arrays, c)] = c}
+            if terms.values.detect{|t| t.kind_of?(Regexp)}
+              matchers.merge!(terms) 
+              next 
+            end
+            
             all += find(terms.merge(strings)).to_a
-          end
-        else
-          all = find(strings)
+          end          
+        else 
+          all += find(strings).to_a
         end
 
         all.each do |item|
           pass = true
-        
+          
           matchers.each do |key, matcher|
             pass = false if !matcher.match(item.send(key))
           end
 
           next unless pass
         
-          yield item if block_given?
+          # yield item if block_given?
         
           items << item
         end

@@ -6,7 +6,7 @@ describe SirTracksAlot::Reports::RootStemReport do
   before do 
     RedisSpecHelper.reset
     @activities.each{|a| SirTracksAlot.record(a)}
-    SirTracksAlot::Count.count(OpenStruct.new(:owner => 'owner', :roots => ['categories']))    
+    SirTracksAlot::Count.count(:owner => 'owner')    
   end  
   
   context 'building HTML with categories' do

@@ -1,6 +1,6 @@
 module SirTracksAlot
   module EventHelper
-    DATE_FORMATS = {:hourly => '%Y/%m/%d %H', :daily => '%Y/%m/%d'}
+    DATE_FORMATS = {:hourly => '%Y/%m/%d %H:00', :daily => '%Y/%m/%d'}
     
     def views(resolution = nil)
       return events.size if resolution.nil?

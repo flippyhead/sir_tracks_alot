@@ -15,7 +15,7 @@ describe SirTracksAlot::Activity do
     it "should store valid activities" do
       @activity.should be_valid
     end
-
+  
     it "should not store invalid activities" do
       activity = SirTracksAlot::Activity.create({})
       activity.should_not be_valid
@@ -46,10 +46,10 @@ describe SirTracksAlot::Activity do
       SirTracksAlot::Activity.all.size.should == 8
     end        
     
-    it "should purge counted" do
+    it "should purge counted, not touching first 500 (by default)" do
       SirTracksAlot::Activity.all.each{|a| a.counted!}
-      SirTracksAlot::Activity.purge!
-      SirTracksAlot::Activity.all.size.should == 0
+      SirTracksAlot::Activity.purge!()
+      SirTracksAlot::Activity.all.size.should == 8
     end
     
     it "should purge counted by range" do
@@ -68,15 +68,15 @@ describe SirTracksAlot::Activity do
     it "should find activities matching attribute regex" do
       SirTracksAlot::Activity.filter(:owner => 'owner', :target => /categories/).size.should == 1
     end
-
+  
     it "should find activities matching attribute string" do
       SirTracksAlot::Activity.filter(:owner => 'owner', :category => 'category').size.should == 1
     end
-
+  
     it "should find activities matching attribute string and attribute regex" do
       SirTracksAlot::Activity.filter(:owner => 'owner', :category => 'category', :target => /categories/).size.should == 1
     end
-
+  
     it "should not find activities matching attribute string but not attribute regex" do
       SirTracksAlot::Activity.filter(:owner => 'owner', :category => 'category', :target => /not_there/).size.should == 0
     end
@@ -91,8 +91,12 @@ describe SirTracksAlot::Activity do
       @activities.each{|a| SirTracksAlot.record(a)}
     end
     
+    it "should filter by members which are regex's" do 
+      # SirTracksAlot::Activity.filter(:owner => 'owner', :target => [/categories/, /\/categories\//]).size.should == 3
+    end    
+
     it "should filter by members of one array" do
-      SirTracksAlot::Activity.filter(:owner => 'owner', :target => ['/categories/item1', '/categories/item2']).size.should == 3
+      SirTracksAlot::Activity.filter(:owner => 'owner', :target => ['/categories/item1', '/categories/item2']).size.should == 3 
     end    
     
     it "should filter by combinations of arrays" do
@@ -132,11 +136,11 @@ describe SirTracksAlot::Activity do
     it "should return grouped counts" do
       @activity.views(:daily).should be_kind_of(Hash)      
     end
-
+  
     it "should return count as hash value" do
       @activity.views(:daily).values.should == [1]
     end
-
+  
     it "should return count key'd by date" do
       key = Time.at(@now).utc.strftime(SirTracksAlot::Activity::DATE_FORMATS[:daily])
       @activity.views(:daily).keys.should == [key]
@@ -158,13 +162,13 @@ describe SirTracksAlot::Activity do
       200.times{@activity.events << SirTracksAlot::Clock.now}
       @activity.visits.should == 1
     end
-
+  
     it "should count 2 visits separated by greater than default session duration as 2 visits" do
       @activity.events << SirTracksAlot::Clock.now 
       @activity.events << SirTracksAlot::Clock.now + 2000
       @activity.visits.should == 2
     end
-
+  
     it "should count 2 visits separated by greater than default session duration as 2, and a 3rd" do
       5.times{@activity.events << SirTracksAlot::Clock.now}
       @activity.events << SirTracksAlot::Clock.now + 2000

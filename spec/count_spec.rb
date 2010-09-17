@@ -60,6 +60,25 @@ describe SirTracksAlot::Count do
     end    
   end
   
+  context 'when summarizing' do
+    before do
+      SirTracksAlot::Count.count(:owner => 'owner')
+    end
+    
+     it "should summarize daily counts" do
+       SirTracksAlot::Count.summarize.should ==  {"2010/07/21"=>[20, 20]}
+     end
+     
+     it "should summarize daily counts with find options" do
+       SirTracksAlot::Count.summarize(:daily, :target => /.+/).should ==  {"2010/07/21"=>[10, 10]}
+     end
+     
+     it "should summarize hourly counts" do
+       SirTracksAlot::Count.summarize(:hourly).should == {"2010/07/21 10:00:00 UTC"=>[2, 2], "2010/07/21 13:00:00 UTC"=>[2, 2], "2010/07/21 18:00:00 UTC"=>[16, 16]}
+     end
+     
+  end
+  
   context 'when totalling' do
     before do 
       @mock_activity = mock(SirTracksAlot::Activity, :visits => 1, :views => 2)
@@ -71,48 +90,30 @@ describe SirTracksAlot::Count do
       SirTracksAlot::Count.total(:views, :owner => 'owner')
     end
     
-    
-    # it "should look for views when counting views" do
-    #   @mock_activity.should_receive(:views).once.and_return(1)
-    #   SirTracksAlot::Count.total(:views, :owner => 'owner')
-    # end    
-    # 
-    # it "should not look for views when counting visits" do
-    #   @mock_activity.should_receive(:views).never
-    #   SirTracksAlot::Activity.count(:visits, :owner => 'owner')
-    # end
-    # 
-    # it "should return views and visits" do            
-    #   SirTracksAlot::Activity.count([:visits, :views], :owner => 'owner').should == [1,2]
-    # end
-    # 
-    # it "should return visits" do    
-    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner').should == 1
-    # end
-    # 
-    # it "should ignore empty only" do
-    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :only => {}).should == 1      
-    # end
-    # 
-    # it "should filter by category" do
-    #   @mock_activity.should_receive(:category).once.and_return('category')
-    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/)
-    # end
-    # 
-    # it "should filter by category and match returning correct count" do
-    #   @mock_activity.stub!(:category => 'category')
-    #   SirTracksAlot::Activity.count([:visits], :owner => 'owner', :category => /category/).should == 1      
-    # end
-  end
-  
-  context 'when counting' do
-    before do
-      @counts = SirTracksAlot::Count.count(:owner => 'owner', :category => ['categories'], :action => ['view'])
+    it "should total views" do
+      SirTracksAlot::Count.total(:views, :owner => 'owner').should == 2
     end
     
-    it "should count all activities for owner" do      
-      SirTracksAlot::Count.count(:owner => 'owner')
+    it "should total visits" do
+      SirTracksAlot::Count.total(:visits, :owner => 'owner').should == 1
+    end
+    
+    it "should total views and visits" do
+      SirTracksAlot::Count.total([:views, :visits], :owner => 'owner').should == [2, 1]
+    end
+  end
+  
+  context 'when counting hourly' do
+    before do
+      @counts = SirTracksAlot::Count.count(:owner => 'owner') 
+    end
+    
+    it "should count all activities for owner" do            
       SirTracksAlot::Count.find(:owner => 'owner').size.should == 13 # one for each unique target, time combo
+    end
+    
+    it "should count activities by action" do
+      SirTracksAlot::Count.find(:action => 'view').size.should == 13 # one for each unique target, time combo
     end
 
     it "should set to counted all activities counted" do      
@@ -122,28 +123,20 @@ describe SirTracksAlot::Count do
     
     it "should only count activities once" do
       SirTracksAlot::Count.count(:owner => 'owner', :category => ['categories'], :action => ['view']).should be_empty
-    end
-    
-    context 'views' do    
-      it "should increment views" do
-
-      end
-      
-      it "should include counts by hour" do
-        @counts[0].hour.should == '18'        
-      end
-    
-      it "should not include counts not requested" do
-        @counts.collect{|c| c.target}.should_not include("/other_categories") 
-      end
-    end
-    
-    context 'visits' do
-      it 'should include counts by hour' do
-        # @counts[1].should == {"/categories"=>{"2010/07/21 18"=>1}, 
-        #   "/categories/item1"=>{"2010/07/21 18"=>2, "2010/07/21 10"=>1, "2010/07/21 13"=>1}, 
-        #   "/categories/item2"=>{"2010/07/21 18"=>1}}
-      end
     end    
+
+    it "should include counts by hour" do
+      @counts[0].hour.should == '18'        
+    end    
+  end
+  
+  context 'when counting daily' do
+    before do
+      @counts = SirTracksAlot::Count.count({:owner => 'owner'}, {}, :daily) 
+    end
+    
+    it "should count all activities for owner" do            
+      SirTracksAlot::Count.find(:owner => 'owner').size.should == 9 # one for each unique target, time combo
+    end
   end
 end

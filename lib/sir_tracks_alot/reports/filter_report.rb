@@ -8,17 +8,10 @@ module SirTracksAlot
       
       # Build up reports by filtering things. Filters are applied and assigned a row title.
       #
-      # SirTracksAlot::Reports::FilterReport.render_html(
-      #   :actions => ['view', 'search']
-      # 
       # :filters = {
       #   'Title' => {:category => 'category', :target => /\/categories/}
       # }
       #      
-      # :filters => {
-      #   :only => {Profile Pages' => {:target => /^\/user_profiles\/.+$/}}
-      #   :except => {Profile Index' => {:target => /^\/user_profiles$/}}
-      # })      
       def setup
         super
         
@@ -28,9 +21,11 @@ module SirTracksAlot
         
         options.filters.each do |title, options_for_find|
           Count.filter(options_for_find.merge(:owner => options.owner)).each do |count|
-            counts[title] ||= [0,0]
-            counts[title][0] += count.visits.to_i
-            counts[title][1] += count.views.to_i
+            count.summaries.each do |summary|
+              counts[title] ||= [0,0]
+              counts[title][0] += summary.visits.to_i
+              counts[title][1] += summary.views.to_i
+            end
           end
         end
       

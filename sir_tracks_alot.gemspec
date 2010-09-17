@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{sir_tracks_alot}
-  s.version = "0.4.4"
+  s.version = "0.5.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Peter T. Brown"]
-  s.date = %q{2010-08-09}
+  s.date = %q{2010-09-16}
   s.description = %q{A high speed general purpose tracking and reporting tool which uses Redis.}
   s.email = %q{peter@flippyhead.com}
   s.extra_rdoc_files = [
@@ -47,6 +47,7 @@ Gem::Specification.new do |s|
      "lib/sir_tracks_alot/reports/simple_report.rb",
      "lib/sir_tracks_alot/reports/target_report.rb",
      "lib/sir_tracks_alot/reports/trackable_report.rb",
+     "sir_tracks_alot.gemspec",
      "spec/activity_spec.rb",
      "spec/count_spec.rb",
      "spec/queue/report_config_spec.rb",
@@ -102,33 +103,33 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<logging>, [">= 0"])
-      s.add_runtime_dependency(%q<twitter>, [">= 0"])
-      s.add_runtime_dependency(%q<ruport>, [">= 0"])
-      s.add_runtime_dependency(%q<ohm>, [">= 0"])
-      s.add_runtime_dependency(%q<redis>, [">= 0"])
-      s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_development_dependency(%q<rspec_hpricot_matchers>, [">= 0"])
+      s.add_runtime_dependency(%q<ruport>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, [">= 0"])
+      s.add_runtime_dependency(%q<redis>, [">= 0"])
+      s.add_runtime_dependency(%q<logging>, [">= 0"])
+      s.add_runtime_dependency(%q<ohm>, [">= 0"])
       s.add_development_dependency(%q<hpricot>, [">= 0"])
+      s.add_runtime_dependency(%q<twitter>, [">= 0"])
     else
-      s.add_dependency(%q<logging>, [">= 0"])
-      s.add_dependency(%q<twitter>, [">= 0"])
-      s.add_dependency(%q<ruport>, [">= 0"])
-      s.add_dependency(%q<ohm>, [">= 0"])
-      s.add_dependency(%q<redis>, [">= 0"])
-      s.add_dependency(%q<rspec>, [">= 0"])
       s.add_dependency(%q<rspec_hpricot_matchers>, [">= 0"])
+      s.add_dependency(%q<ruport>, [">= 0"])
+      s.add_dependency(%q<rspec>, [">= 0"])
+      s.add_dependency(%q<redis>, [">= 0"])
+      s.add_dependency(%q<logging>, [">= 0"])
+      s.add_dependency(%q<ohm>, [">= 0"])
       s.add_dependency(%q<hpricot>, [">= 0"])
+      s.add_dependency(%q<twitter>, [">= 0"])
     end
   else
-    s.add_dependency(%q<logging>, [">= 0"])
-    s.add_dependency(%q<twitter>, [">= 0"])
-    s.add_dependency(%q<ruport>, [">= 0"])
-    s.add_dependency(%q<ohm>, [">= 0"])
-    s.add_dependency(%q<redis>, [">= 0"])
-    s.add_dependency(%q<rspec>, [">= 0"])
     s.add_dependency(%q<rspec_hpricot_matchers>, [">= 0"])
+    s.add_dependency(%q<ruport>, [">= 0"])
+    s.add_dependency(%q<rspec>, [">= 0"])
+    s.add_dependency(%q<redis>, [">= 0"])
+    s.add_dependency(%q<logging>, [">= 0"])
+    s.add_dependency(%q<ohm>, [">= 0"])
     s.add_dependency(%q<hpricot>, [">= 0"])
+    s.add_dependency(%q<twitter>, [">= 0"])
   end
 end
 
