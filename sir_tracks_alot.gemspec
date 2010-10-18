@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{sir_tracks_alot}
-  s.version = "0.5.2"
+  s.version = "0.6.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Peter T. Brown"]
@@ -47,6 +47,7 @@ Gem::Specification.new do |s|
      "lib/sir_tracks_alot/reports/simple_report.rb",
      "lib/sir_tracks_alot/reports/target_report.rb",
      "lib/sir_tracks_alot/reports/trackable_report.rb",
+     "lib/sir_tracks_alot/summary.rb",
      "sir_tracks_alot.gemspec",
      "spec/activity_spec.rb",
      "spec/count_spec.rb",

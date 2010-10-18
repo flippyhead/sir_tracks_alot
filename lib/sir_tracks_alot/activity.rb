@@ -14,7 +14,7 @@ module SirTracksAlot
     attribute :action     # create, view, login, etc.
     attribute :user_agent # IE/Safari Windows/Mac etc.
     attribute :counted    # true/false
-    list      :events     # Clock.now's
+    list      :events    # Clock.now's
 
     index :owner
     index :actor

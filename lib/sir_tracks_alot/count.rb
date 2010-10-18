@@ -69,9 +69,9 @@ module SirTracksAlot
         count.summaries.each do |summary|          
           key = case resolution
             when :daily
-              Time.at(summary.date).utc.strftime('%Y/%m/%d')
+              Time.at(summary.date.to_i).utc.strftime('%Y/%m/%d')
             when :hourly
-              Time.at(summary.date).utc.strftime('%Y/%m/%d %H:00 UTC')
+              Time.at(summary.date.to_i).utc.strftime('%Y/%m/%d %H:00 UTC')
             end
         
           counts[key]   ||= [0,0]
@@ -90,20 +90,23 @@ module SirTracksAlot
 
       activities.each do |activity|        
         count = Count.find_or_create(:owner => activity.owner, :category => activity.category,  :target => activity.target, :action => activity.action)
-      
+
         activity.views(resolution).each do |time, views|
           date = Time.parse(time).to_i
           summary = count.summaries.find(:date => date).first || Summary.create(:date => date)
-          summary.update(:views => views)                    
+          count.summaries << summary
+          summary.update(:views => (summary.views||0).to_i + views.to_i)
         end
 
         activity.visits(session_duration, resolution).each do |time, visits|
           date = Time.parse(time).to_i          
           summary = count.summaries.find(:date => date).first || Summary.create(:date => date)
-          summary.update(:views => visits)                              
+          count.summaries << summary
+          summary.update(:visits => (summary.visits||0).to_i + visits.to_i)
         end
 
         activity.counted!        
+        counts << count
       end
       
       counts

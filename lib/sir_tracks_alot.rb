@@ -6,7 +6,7 @@ begin
   require "bundler"
   Bundler.setup
   Bundler.require
-# rescue LoadError
+rescue LoadError
   require 'logging'
   require 'twitter'
   require 'ruport'

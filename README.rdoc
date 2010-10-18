@@ -1,6 +1,34 @@
 = sir_tracks_alot
 
-Description goes here.
+Sir Tracks Alot is a ruby library designed to aid in the tracking, collating and analysis of arbitrary usage data. You can use it to record anything! Then summarize what's been recorded into useful graphs. The primary use case for Sir Tracks Alot was to instrument web usage of Rails applications. 
+
+For example, to that a specific user has viewed a specific page:
+
+	SirTracksAlot.record_activity :owner => 'owner', :actor => '/users/123', :target => '/pages/1'
+
+To include information taken from a web request (such as the user agent), simple include it:
+
+	SirTracksAlot.record_activity :owner => 'owner', :actor => '/users/123', :target => '/pages/1', :request => request
+
+You can also include the notion of action type:
+
+	SirTracksAlot.record_activity :owner => 'owner', :actor => '/users/123', :target => '/pages/1', :action => 'create'
+	
+To investigate what's been stored you can filter activities with a variety of method and any attribute can be queried. 
+
+Direct queries work on strings. For example, to search for all activities by a certain owner:
+
+	Activity.filter(:owner => 'owner')
+	
+Regular expressions can be used:
+
+	Activity.filter(:owner => 'owner', :target => /\/pages\/\d+/)
+
+You can also combine permutations of various options. For example, to find all 'create' and 'view' actions for both '/pages' and '/profiles' targets:
+
+	Activity.filter(:owner => 'owner', :target => ['/pages', '/profiles'], :actions => ['create', 'destroy'])
+	
+
 
 == Note on Patches/Pull Requests
  
